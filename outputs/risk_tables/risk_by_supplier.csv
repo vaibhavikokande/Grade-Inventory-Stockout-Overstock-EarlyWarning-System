@@ -1,0 +1,13 @@
+supplier_name,n_skus,inventory_value,excess_value,estimated_lost_revenue,n_stockout_risk,n_overstock_risk,avg_priority
+Maison Lyonnaise,415,376158.13,190213.44,15787.62,44,141,24.44
+Pearl River Sourcing,181,241547.12,189282.36,5793.91,18,111,38.93
+Shenzhen Craftworks,183,172351.37,136872.57,6614.61,8,101,33.3
+Golden Harbour Export,328,183795.49,131706.59,8318.15,36,151,27.84
+Bay Point Industries,180,129246.83,70504.23,3858.02,20,71,24.32
+Northgate Homeware,244,201761.59,69807.5,3091.75,16,77,17.96
+Camden Wholesale,277,182474.78,67655.99,18834.41,18,103,20.93
+Pennine Giftware,149,114839.42,56339.61,128.7,2,68,24.05
+Severn Valley Supply,89,129867.67,43694.14,0.0,0,23,13.22
+Rhineland Dekor,106,73392.75,43305.81,160.71,10,33,17.36
+Adriatic Trading,169,93269.22,39176.16,40.74,6,58,16.37
+Iberica Casa,49,22235.04,8245.75,65.52,3,13,13.01

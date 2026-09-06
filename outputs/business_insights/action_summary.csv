@@ -1,0 +1,8 @@
+action_type,action_priority,n_skus,total_value_gbp
+Markdown / Clearance,P2 - This month,376,558456.24
+Liquidate,P2 - This month,265,241820.42
+Reduce Replenishment,P3 - Next cycle,313,186097.08
+Reorder Now,P1 - Immediate,34,35801.28
+Expedite Reorder,P1 - Immediate,22,20197.56
+Reorder,P2 - This week,125,6695.3
+No Action,P4 - Monitor,1235,0.0

@@ -1,0 +1,13 @@
+supplier_id,supplier_name,sourcing_region,supplier_lead_time_days,supplier_lead_time_sd_days,n_skus
+SUP-10,Golden Harbour Export,Far East Import,39,6.33,328
+SUP-02,Pennine Giftware,UK Domestic,11,2.29,149
+SUP-01,Northgate Homeware,UK Domestic,5,1.66,244
+SUP-04,Camden Wholesale,UK Domestic,10,2.46,277
+SUP-05,Rhineland Dekor,EU Import,22,3.97,106
+SUP-09,Pearl River Sourcing,Far East Import,42,7.47,181
+SUP-03,Severn Valley Supply,UK Domestic,5,1.14,89
+SUP-07,Iberica Casa,EU Import,23,2.93,49
+SUP-06,Maison Lyonnaise,EU Import,22,2.32,415
+SUP-11,Shenzhen Craftworks,Far East Import,36,6.66,183
+SUP-08,Adriatic Trading,EU Import,18,4.32,169
+SUP-12,Bay Point Industries,Far East Import,32,5.19,180

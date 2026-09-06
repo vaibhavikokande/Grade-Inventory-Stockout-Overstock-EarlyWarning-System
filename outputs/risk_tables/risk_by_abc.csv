@@ -1,0 +1,4 @@
+abc_class,n_skus,inventory_value,excess_value,estimated_lost_revenue,n_stockout_risk,n_overstock_risk,avg_priority
+A,701,1161953.68,536744.12,34247.55,29,210,19.64
+C,915,340841.25,261439.36,11567.7,87,444,26.92
+B,754,418144.48,248620.67,16878.89,65,296,24.64

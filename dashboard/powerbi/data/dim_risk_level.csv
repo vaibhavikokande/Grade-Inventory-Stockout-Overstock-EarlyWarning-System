@@ -1,0 +1,6 @@
+risk_level,risk_sort_order,risk_family,risk_colour_hex,risk_definition
+Critical Stockout Risk,1,Stockout,#C0392B,Inventory cannot cover demand over the lead time
+Stockout Risk,2,Stockout,#EB6834,Inventory has fallen below the reorder point
+Healthy,3,Healthy,#1BAF7A,Inventory is within the target operating range
+Overstock Risk,4,Overstock,#EDA100,Inventory exceeds 1.5x the 90-day requirement
+Severe Overstock,5,Overstock,#4A3AA7,Inventory exceeds 3x the 90-day requirement

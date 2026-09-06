@@ -1,0 +1,30 @@
+# Inventory Stockout & Overstock Early-Warning System
+# Python 3.11+ (developed and tested on 3.13.5)
+
+# --- core data stack -------------------------------------------------------
+pandas>=2.0
+numpy>=1.24,<2.0
+pyarrow>=14.0          # parquet I/O
+openpyxl>=3.1          # reads the source .xlsx workbook
+PyYAML>=6.0            # config/config.yaml
+
+# --- analytics -------------------------------------------------------------
+duckdb>=0.10           # SQL analytical layer (reads parquet natively)
+scipy>=1.11            # norm.ppf for the service-level z-score
+statsmodels>=0.14      # ETS / Holt-Winters and SARIMAX
+scikit-learn>=1.3      # metric utilities
+
+# --- visualisation ---------------------------------------------------------
+matplotlib>=3.7
+seaborn>=0.13
+plotly>=5.18
+
+# --- notebooks -------------------------------------------------------------
+jupyter>=1.0
+nbformat>=5.9
+
+# NOT USED, and deliberately so:
+#   prophet  - rejected on evidence. 75% of SKU-days are zero, which Prophet's
+#              smooth trend+seasonality decomposition handles poorly, and it is
+#              ~50x slower than the methods that won the backtest.
+#              See src/forecasting.py and README "Forecasting" for the numbers.

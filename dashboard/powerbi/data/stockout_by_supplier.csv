@@ -1,0 +1,13 @@
+supplier_name,sourcing_region,n_skus,avg_lead_time_days,demand_units,lost_units,fill_rate,lost_revenue
+Maison Lyonnaise,EU Import,415,22.0,1399442.0,150412.0,0.8925,355017.66
+Shenzhen Craftworks,Far East Import,183,36.0,676160.0,130515.0,0.807,210979.74
+Northgate Homeware,UK Domestic,244,4.8,743515.0,64443.0,0.9133,188368.63
+Golden Harbour Export,Far East Import,328,38.7,1112673.0,123033.0,0.8894,179567.31
+Bay Point Industries,Far East Import,180,32.1,685472.0,61411.0,0.9104,146381.2
+Pearl River Sourcing,Far East Import,181,42.0,455679.0,59079.0,0.8703,130494.07
+Camden Wholesale,UK Domestic,277,10.0,793532.0,46966.0,0.9408,118470.6
+Pennine Giftware,UK Domestic,149,11.1,677146.0,86949.0,0.8716,112062.88
+Adriatic Trading,EU Import,169,17.9,791811.0,33931.0,0.9571,63015.25
+Iberica Casa,EU Import,49,23.1,161880.0,16926.0,0.8954,38248.19
+Rhineland Dekor,EU Import,106,21.9,461786.0,33464.0,0.9275,35882.95
+Severn Valley Supply,UK Domestic,89,4.7,796298.0,16795.0,0.9789,31295.44

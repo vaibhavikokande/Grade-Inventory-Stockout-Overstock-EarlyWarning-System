@@ -1,0 +1,251 @@
+// =============================================================================
+// Inventory Stockout & Overstock Early-Warning System — DAX measure library
+// =============================================================================
+// Paste these into Power BI Desktop (Modeling > New Measure), or create a
+// dedicated "_Measures" table (Enter Data, one dummy column, delete it) and
+// hang every measure off that so they group together in the Fields pane.
+//
+// CONVENTIONS
+//   * Measures never reference a column directly on a visual — everything is
+//     an explicit measure so formatting and filter behaviour stay consistent.
+//   * Ratios use DIVIDE(), never "/", so a zero denominator returns BLANK()
+//     rather than an error that breaks the whole visual.
+//   * Anything that is an ESTIMATE is named with "Est." so the label carries
+//     the caveat onto the canvas.
+// =============================================================================
+
+
+// -----------------------------------------------------------------------------
+// 1. PORTFOLIO COUNTS
+// -----------------------------------------------------------------------------
+
+Total SKUs = DISTINCTCOUNT ( fact_sku_risk[product_id] )
+
+Stockout Risk SKUs =
+CALCULATE ( [Total SKUs], fact_sku_risk[risk_family] = "Stockout" )
+
+Critical Stockout SKUs =
+CALCULATE ( [Total SKUs], fact_sku_risk[risk_level] = "Critical Stockout Risk" )
+
+Overstock Risk SKUs =
+CALCULATE ( [Total SKUs], fact_sku_risk[risk_family] = "Overstock" )
+
+Severe Overstock SKUs =
+CALCULATE ( [Total SKUs], fact_sku_risk[risk_level] = "Severe Overstock" )
+
+Dead Stock SKUs =
+CALCULATE ( [Total SKUs], fact_sku_risk[is_dead_stock] = TRUE )
+
+Healthy SKUs =
+CALCULATE ( [Total SKUs], fact_sku_risk[risk_family] = "Healthy" )
+
+Actionable SKUs =
+CALCULATE ( [Total SKUs], fact_sku_risk[is_actionable] = TRUE )
+
+// Share of the portfolio at risk — the headline "how bad is it" number.
+% SKUs At Risk =
+DIVIDE ( [Stockout Risk SKUs] + [Overstock Risk SKUs], [Total SKUs] )
+
+
+// -----------------------------------------------------------------------------
+// 2. FINANCIAL EXPOSURE
+// -----------------------------------------------------------------------------
+// Both of these are ESTIMATES built on a simulated inventory layer.
+// See reports/ASSUMPTIONS.md. The "Est." prefix keeps that visible on-canvas.
+
+Est. Lost Revenue = SUM ( fact_sku_risk[estimated_lost_revenue] )
+
+Est. Lost Margin = SUM ( fact_sku_risk[estimated_lost_margin] )
+
+Excess Inventory Value = SUM ( fact_sku_risk[excess_value] )
+
+Total Inventory Value = SUM ( fact_sku_risk[inventory_value] )
+
+Dead Stock Value =
+CALCULATE ( [Total Inventory Value], fact_sku_risk[is_dead_stock] = TRUE )
+
+Margin At Risk = SUM ( fact_sku_risk[margin_at_risk] )
+
+Recommended Order Value = SUM ( fact_sku_risk[order_cost] )
+
+// The share of the balance sheet that is not working.
+% Inventory Excess =
+DIVIDE ( [Excess Inventory Value], [Total Inventory Value] )
+
+// Combined opportunity: capital that could be released plus revenue that
+// could be protected. This is the number for the top-left executive card.
+Total Opportunity = [Excess Inventory Value] + [Est. Lost Revenue]
+
+
+// -----------------------------------------------------------------------------
+// 3. INVENTORY EFFICIENCY
+// -----------------------------------------------------------------------------
+
+Inventory Units = SUM ( fact_sku_risk[current_inventory] )
+
+Units On Order = SUM ( fact_sku_risk[on_order] )
+
+Inventory Position = SUM ( fact_sku_risk[inventory_position] )
+
+// Weighted, not an average of averages: summing numerator and denominator
+// separately is the only correct way to aggregate a coverage ratio.
+Avg Days of Inventory =
+VAR TotalUnits = [Inventory Units]
+VAR DailyDemand = SUM ( fact_sku_risk[avg_daily_demand] )
+RETURN DIVIDE ( TotalUnits, DailyDemand )
+
+Inventory Turns = DIVIDE ( 365, [Avg Days of Inventory] )
+
+// Median is more honest than mean here — days-of-cover is heavily right-skewed
+// by dead stock, so the mean overstates typical coverage.
+Median Days of Cover = MEDIAN ( fact_sku_risk[days_of_cover] )
+
+
+// -----------------------------------------------------------------------------
+// 4. HISTORICAL SERVICE (from the reconstructed ledger)
+// -----------------------------------------------------------------------------
+
+Demand Units = SUM ( fact_demand_weekly_bi[demand_units] )
+
+Units Fulfilled = SUM ( fact_demand_weekly_bi[units_fulfilled] )
+
+Lost Units = SUM ( fact_demand_weekly_bi[lost_units] )
+
+Historical Lost Revenue = SUM ( fact_demand_weekly_bi[lost_revenue] )
+
+// Unit fill rate — the service metric the business actually feels.
+Fill Rate = DIVIDE ( [Units Fulfilled], [Demand Units] )
+
+Fill Rate Gap to Target = 0.95 - [Fill Rate]
+
+Stockout Days = SUM ( fact_demand_weekly_bi[stockout_days] )
+
+Avg Weekly Inventory Value = AVERAGE ( fact_demand_weekly_bi[avg_inventory_value] )
+
+
+// -----------------------------------------------------------------------------
+// 5. FORECAST & ACCURACY
+// -----------------------------------------------------------------------------
+
+Forecast Units 7d = SUM ( fact_sku_risk[forecast_units_7d] )
+Forecast Units 30d = SUM ( fact_sku_risk[forecast_units_30d] )
+Forecast Units 90d = SUM ( fact_sku_risk[forecast_units_90d] )
+
+// The alternative seasonal regime. The as-of date sits on the Christmas peak
+// and the operational window is the post-Christmas collapse, which the
+// backtest folds never covered. Showing both scenarios side by side is the
+// honest presentation — see reports/ASSUMPTIONS.md.
+Forecast Seasonal Scenario = SUM ( fact_sku_risk[forecast_seasonal_scenario] )
+
+Forecast Scenario Gap = [Forecast Units 90d] - [Forecast Seasonal Scenario]
+
+// MASE < 1 means the model beats a naive one-step forecast. It is the right
+// accuracy measure here because 75% of SKU-days are zero, which makes MAPE
+// undefined and sMAPE hard to interpret.
+Median MASE = MEDIAN ( fact_sku_risk[backtest_mase] )
+
+SKUs Beating Naive =
+CALCULATE ( [Total SKUs], FILTER ( fact_sku_risk, fact_sku_risk[backtest_mase] < 1 ) )
+
+% SKUs Beating Naive = DIVIDE ( [SKUs Beating Naive], [Total SKUs] )
+
+Median sMAPE = MEDIAN ( fact_sku_risk[backtest_smape] )
+
+Avg Demand Variability = AVERAGE ( fact_sku_risk[coef_variation_90d] )
+
+
+// -----------------------------------------------------------------------------
+// 6. DYNAMIC TITLES & LABELS
+// -----------------------------------------------------------------------------
+// Bind these to a visual's Title > fx > Field value so headings respond to
+// slicers instead of going stale.
+
+Title Executive =
+"Inventory Risk Overview  |  "
+    & [Total SKUs] & " SKUs  |  as at "
+    & FORMAT ( MAX ( fact_sku_risk[as_of_date] ), "d MMM yyyy" )
+
+Title Stockout Page =
+VAR N = [Stockout Risk SKUs]
+RETURN
+IF (
+    N = 0,
+    "No SKUs currently below their reorder point",
+    N & " SKUs below reorder point  |  "
+        & FORMAT ( [Est. Lost Revenue], "£#,##0" ) & " revenue at risk"
+)
+
+Title Overstock Page =
+FORMAT ( [Excess Inventory Value], "£#,##0" )
+    & " tied up across " & [Overstock Risk SKUs] & " SKUs  ("
+    & FORMAT ( [% Inventory Excess], "0.0%" ) & " of inventory value)"
+
+// Empty-state message so a filtered-to-nothing table explains itself.
+No Data Message =
+IF ( [Total SKUs] = 0, "No SKUs match the current filters", "" )
+
+
+// -----------------------------------------------------------------------------
+// 7. CONDITIONAL-FORMATTING HELPERS
+// -----------------------------------------------------------------------------
+// Return hex strings; bind via Conditional formatting > Format style > Field value.
+
+Risk Colour =
+SWITCH (
+    SELECTEDVALUE ( fact_sku_risk[risk_level] ),
+    "Critical Stockout Risk", "#C0392B",
+    "Stockout Risk",          "#EB6834",
+    "Healthy",                "#1BAF7A",
+    "Overstock Risk",         "#EDA100",
+    "Severe Overstock",       "#4A3AA7",
+    "#95A5A6"
+)
+
+// Traffic light on the coverage ratio: red below the reorder point,
+// amber approaching it, green healthy, purple when it tips into overstock.
+Cover Ratio Colour =
+VAR R = SELECTEDVALUE ( fact_sku_risk[cover_ratio] )
+RETURN
+SWITCH (
+    TRUE (),
+    R < 0.5,  "#C0392B",
+    R < 1.0,  "#EB6834",
+    R <= 3.0, "#1BAF7A",
+    "#4A3AA7"
+)
+
+Fill Rate Colour =
+VAR F = [Fill Rate]
+RETURN SWITCH ( TRUE (), F >= 0.95, "#1BAF7A", F >= 0.90, "#EDA100", "#C0392B" )
+
+// Priority band used for grouping the action list.
+Priority Band =
+VAR S = SELECTEDVALUE ( fact_sku_risk[priority_score] )
+RETURN SWITCH ( TRUE (), S >= 75, "1 · Critical", S >= 50, "2 · High", S >= 25, "3 · Medium", "4 · Low" )
+
+
+// -----------------------------------------------------------------------------
+// 8. CALCULATED COLUMNS (create on the table, not as measures)
+// -----------------------------------------------------------------------------
+
+// On dim_product_bi — buckets the catalogue for the lead-time analysis.
+Lead Time Band =
+SWITCH (
+    TRUE (),
+    dim_product_bi[lead_time_days] <= 10, "1 · ≤10 days",
+    dim_product_bi[lead_time_days] <= 20, "2 · 11-20 days",
+    dim_product_bi[lead_time_days] <= 30, "3 · 21-30 days",
+    "4 · >30 days"
+)
+
+// On fact_sku_risk — days of cover bucketed for the overstock histogram.
+Cover Band =
+SWITCH (
+    TRUE (),
+    ISBLANK ( fact_sku_risk[days_of_cover] ), "No forecast demand",
+    fact_sku_risk[days_of_cover] <= 30,  "0-30 days",
+    fact_sku_risk[days_of_cover] <= 90,  "31-90 days",
+    fact_sku_risk[days_of_cover] <= 180, "91-180 days",
+    fact_sku_risk[days_of_cover] <= 365, "181-365 days",
+    "365+ days"
+)

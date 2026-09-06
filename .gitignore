@@ -1,0 +1,27 @@
+# --- data ------------------------------------------------------------------
+# The raw workbook (45 MB) is redistributable but large; download instructions
+# are in the README. Processed parquet is fully reproducible from it.
+data/raw/*.xlsx
+data/interim/
+data/processed/*.parquet
+data/processed/*.duckdb
+
+# Keep the Power BI CSV exports - they ARE the deliverable for the dashboard.
+!dashboard/powerbi/data/*.csv
+
+# --- python ----------------------------------------------------------------
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.ipynb_checkpoints/
+.pytest_cache/
+.ruff_cache/
+
+# --- os / editor -----------------------------------------------------------
+.DS_Store
+.vscode/
+.idea/
+
+# --- power bi --------------------------------------------------------------
+*.pbix.bak

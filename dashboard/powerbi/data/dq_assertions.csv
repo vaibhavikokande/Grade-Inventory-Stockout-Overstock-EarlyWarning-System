@@ -1,0 +1,15 @@
+assertion,violations,status
+Demand panel has no negative demand,0.0,PASS
+Demand panel is a complete SKU x day grid (no gaps),0.0,PASS
+Every SKU has a positive lead time,0.0,PASS
+Every universe SKU has supply attributes,0.0,PASS
+Inventory ledger never goes negative,0.0,PASS
+Ledger demand identity: fulfilled + lost = demand,0.0,PASS
+Ledger flow identity: opening - fulfilled = closing,0.0,PASS
+No exact duplicate transaction lines remain,0.0,PASS
+No invoice appears in both workbook sheets,0.0,PASS
+No negative quantities in the sales table,0.0,PASS
+No null or future invoice_date,0.0,PASS
+No null product_id in the sales table,0.0,PASS
+product_id is always upper-case (case variants merged),0.0,PASS
+unit_cost is always below selling_price,0.0,PASS

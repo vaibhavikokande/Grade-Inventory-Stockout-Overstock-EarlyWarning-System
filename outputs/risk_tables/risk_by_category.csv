@@ -1,0 +1,15 @@
+category,n_skus,inventory_value,excess_value,estimated_lost_revenue,n_stockout_risk,n_overstock_risk,avg_priority
+Kitchen & Dining,504,429840.53,204203.21,18559.62,52,156,22.06
+Other,235,178439.69,129402.32,5911.86,23,115,29.52
+Christmas & Seasonal,145,151445.82,123972.46,3473.01,5,87,36.73
+Garden & Outdoor,80,137970.59,115160.21,2714.0,6,51,41.11
+Home Decor,363,245130.98,93093.0,22447.15,29,127,20.84
+Candles & Fragrance,187,113624.04,77319.73,4026.8,19,98,30.56
+Stationery & Craft,172,119726.93,72073.34,2987.5,3,83,25.61
+Jewellery & Accessories,89,60420.23,49909.94,1568.96,14,33,26.15
+Bags,113,141396.73,46811.43,128.7,1,32,14.75
+Storage & Organisation,136,121211.88,38295.28,9.75,8,47,18.04
+Party & Celebration,176,89561.23,36013.38,91.89,8,54,14.52
+Toys & Games,96,54226.69,33466.53,310.8,10,43,23.76
+Vintage & Retro,44,42837.72,17212.64,464.1,2,18,23.11
+Lighting,30,35106.35,9870.68,0.0,1,6,10.71

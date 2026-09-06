@@ -1,0 +1,11 @@
+product_id,product_name,risk_level,action_type,action_priority,action_detail,action_value_gbp,priority_score
+15056P,EDWARDIAN PARASOL PINK,Severe Overstock,Markdown / Clearance,P2 - This month,"Run a clearance or promotion on 6,638 excess units (£24,826 of capital). Suspend all replenishment from Pearl River Sourcing for this SKU.",24826.12,92.01
+20679,EDWARDIAN PARASOL RED,Severe Overstock,Markdown / Clearance,P2 - This month,"Run a clearance or promotion on 6,461 excess units (£23,712 of capital). Suspend all replenishment from Pearl River Sourcing for this SKU.",23711.87,88.36
+22086,PAPER CHAIN KIT 50'S CHRISTMAS ,Severe Overstock,Markdown / Clearance,P2 - This month,"Run a clearance or promotion on 13,526 excess units (£22,183 of capital). Suspend all replenishment from Shenzhen Craftworks for this SKU.",22182.64,72.21
+15056BL,EDWARDIAN PARASOL BLACK,Severe Overstock,Markdown / Clearance,P2 - This month,"Run a clearance or promotion on 5,464 excess units (£18,905 of capital). Suspend all replenishment from Pearl River Sourcing for this SKU.",18905.44,77.43
+85014A,BLACK/BLUE POLKADOT UMBRELLA,Severe Overstock,Markdown / Clearance,P2 - This month,"Run a clearance or promotion on 4,737 excess units (£14,258 of capital). Suspend all replenishment from Rhineland Dekor for this SKU.",14258.37,91.07
+84347,ROTATING SILVER ANGELS T-LIGHT HLDR,Overstock Risk,Reduce Replenishment,P3 - Next cycle,"Pause or halve the next order. 8,639 excess units are tying up £11,663.",11662.65,60.12
+22837,HOT WATER BOTTLE BABUSHKA ,Severe Overstock,Liquidate,P2 - This month,"Clear 3,898 units (£11,421 at cost) through clearance, bundling or write-off. Do not reorder.",11421.14,89.81
+22413,METAL SIGN TAKE IT OR LEAVE IT ,Critical Stockout Risk,Reorder Now,P1 - Immediate,"Raise a purchase order for 5,077 units with Camden Wholesale today (lead time 11 days).",11044.8,91.52
+85014B,RED RETROSPOT UMBRELLA,Severe Overstock,Markdown / Clearance,P2 - This month,"Run a clearance or promotion on 3,268 excess units (£10,425 of capital). Suspend all replenishment from Rhineland Dekor for this SKU.",10424.92,74.35
+21967,PACK OF 12 SKULL TISSUES,Severe Overstock,Markdown / Clearance,P2 - This month,"Run a clearance or promotion on 63,004 excess units (£10,081 of capital). Suspend all replenishment from Pearl River Sourcing for this SKU.",10080.64,89.37

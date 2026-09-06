@@ -1,0 +1,6 @@
+risk_level,n_skus,n_actionable,inventory_value,excess_value,estimated_lost_revenue,recommended_order_value,pct_of_skus
+Critical Stockout Risk,56,51,5938.89,0.0,55998.84,48972.69,2.4
+Stockout Risk,125,24,24958.67,0.0,6695.3,15272.3,5.3
+Healthy,1239,0,774672.09,68009.01,0.0,0.0,52.3
+Overstock Risk,334,285,298594.66,191399.38,0.0,0.0,14.1
+Severe Overstock,616,579,816775.1,787395.76,0.0,0.0,26.0

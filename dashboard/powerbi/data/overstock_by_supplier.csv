@@ -1,0 +1,13 @@
+supplier_name,sourcing_region,n_overstocked_skus,n_dead_stock_skus,excess_value,margin_at_risk,median_excess_ratio
+Pearl River Sourcing,Far East Import,111,28.0,186402.75,131633.85,5.59
+Maison Lyonnaise,EU Import,141,45.0,176013.81,117789.78,5.83
+Shenzhen Craftworks,Far East Import,101,32.0,129283.48,98934.91,4.85
+Golden Harbour Export,Far East Import,151,42.0,123723.53,99336.87,4.53
+Northgate Homeware,UK Domestic,77,24.0,66053.52,43013.83,4.0
+Camden Wholesale,UK Domestic,103,28.0,65515.04,47476.95,5.03
+Bay Point Industries,Far East Import,71,13.0,59499.3,44942.59,2.8
+Pennine Giftware,UK Domestic,68,20.0,53211.77,35772.01,5.39
+Rhineland Dekor,EU Import,33,7.0,41814.23,37846.71,4.06
+Adriatic Trading,EU Import,58,14.0,36790.85,27364.3,3.01
+Severn Valley Supply,UK Domestic,23,8.0,35214.65,24703.27,6.31
+Iberica Casa,EU Import,13,0.0,5272.21,3992.46,2.51

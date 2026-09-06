@@ -1,0 +1,188 @@
+# =============================================================================
+# Inventory Stockout & Overstock Early-Warning System — central configuration
+# =============================================================================
+# Every business assumption, threshold and tuning constant lives here so that
+# results are reproducible and an analyst can re-run the whole pipeline under a
+# different service level / planning horizon without touching code.
+# See reports/ASSUMPTIONS.md for the rationale behind each value.
+
+project:
+  name: inventory-risk-analytics
+  random_seed: 42
+  # Last transaction in the source data. The system is evaluated "as of" this
+  # date; nothing after it may influence any forecast or metric.
+  as_of_date: "2011-12-09"
+
+paths:
+  raw_excel: data/raw/online_retail_II.xlsx
+  interim: data/interim
+  processed: data/processed
+  outputs: outputs
+  reports: reports
+  duckdb: data/processed/inventory.duckdb
+
+# -----------------------------------------------------------------------------
+# Data cleaning
+# -----------------------------------------------------------------------------
+cleaning:
+  # The workbook ships two sheets whose date ranges overlap for 2010-12-01..09.
+  # The overlapping rows are an identical multiset, i.e. the same nine trading
+  # days were exported into both sheets. Left unhandled this DOUBLES demand for
+  # those days. We keep the first sheet's copy.
+  drop_sheet_overlap: true
+
+  # Exact duplicate transaction lines (same invoice, SKU, timestamp, qty, price)
+  # within a single sheet are treated as double-scanned rows.
+  drop_exact_duplicates: true
+
+  # A real product SKU is a 4-5 digit code with an optional 1-2 letter variant
+  # suffix (e.g. 85123A). Everything else is a service/adjustment code.
+  product_stockcode_regex: '^\d{4,5}[A-Za-z]{0,2}$'
+
+  # Service, fee and adjustment codes that must never enter the demand series.
+  non_product_codes:
+    [POST, DOT, M, C2, D, S, B, CRUK, PADS, ADJUST, ADJUST2, AMAZONFEE,
+     BANK CHARGES, TEST001, TEST002, SP1002]
+
+  # Free-text markers that identify warehouse adjustment rows masquerading as
+  # transactions ("lost", "damages", "wrongly coded", "printing smudges", ...).
+  adjustment_description_markers:
+    [lost, damage, damages, damaged, smash, broken, crushed, wet, mould,
+     "wrongly", "wrong", "mixed up", "missing", "found", "check", "?", "sold as",
+     "thrown away", "throw away", "adjust", "counted", "incorrect", "faulty",
+     "sample", "test", "amazon", "returned", "dotcom", "mailout", "rusty",
+     "showroom", "display", "given away", "free", "smudge", "cracked"]
+
+  min_unit_price: 0.01     # rows at or below this are not saleable revenue lines
+  max_unit_price: 500.0    # above this on a product SKU is a pricing error
+
+# -----------------------------------------------------------------------------
+# SKU universe for the operational inventory system
+# -----------------------------------------------------------------------------
+# The early-warning system only makes sense for SKUs the business is actually
+# still stocking and for which demand variability can be estimated.
+sku_universe:
+  min_history_days: 180        # calendar days between first and last sale
+  min_active_days: 24          # distinct days with a sale over the whole history
+  recent_window_days: 90       # must have sold at least once in this trailing window
+  min_total_units: 100         # ignore negligible long-tail SKUs
+
+# -----------------------------------------------------------------------------
+# Derived product attributes (NOT present in the source data)
+# -----------------------------------------------------------------------------
+derived_attributes:
+  # Gross margin by derived category, used to back out unit_cost from price.
+  # unit_cost = selling_price * (1 - gross_margin)
+  gross_margin_by_category:
+    Christmas & Seasonal: 0.45
+    Bags: 0.42
+    Kitchen & Dining: 0.40
+    Home Decor: 0.44
+    Candles & Fragrance: 0.46
+    Garden & Outdoor: 0.38
+    Stationery & Craft: 0.41
+    Toys & Games: 0.43
+    Party & Celebration: 0.45
+    Storage & Organisation: 0.39
+    Jewellery & Accessories: 0.48
+    Vintage & Retro: 0.44
+    Lighting: 0.40
+    Other: 0.42
+  margin_jitter_sd: 0.03       # SKU-level noise around the category margin
+  margin_bounds: [0.22, 0.62]
+
+  n_suppliers: 12
+  # Lead time is drawn per supplier then jittered per SKU. Domestic UK suppliers
+  # sit at the short end, Far-East importers at the long end.
+  supplier_lead_time_days_range: [5, 45]
+  supplier_lead_time_sd_range: [1.0, 8.0]   # day-to-day variability of that supplier
+  sku_lead_time_jitter_days: 3
+
+# -----------------------------------------------------------------------------
+# Historical inventory reconstruction (incumbent replenishment policy)
+# -----------------------------------------------------------------------------
+# We reconstruct a daily inventory ledger by running a deliberately simple
+# LEGACY policy against the real observed demand. This is what the business is
+# assumed to be doing today; the whole point of the project is to quantify where
+# that policy fails. The policy uses only trailing information — never the future.
+incumbent_policy:
+  review_period_days: 7        # planner reviews stock weekly
+  cover_weeks: 8               # orders up to 8 weeks of trailing average demand
+  trailing_demand_window: 56   # days of history used for that average
+  use_supplier_quoted_lead_time: true   # planner covers the QUOTED lead time...
+  nominal_lead_time_days: 14   # ...falling back to this flat value if disabled
+  initial_cover_weeks: 8       # opening stock position at simulation start
+  warmup_days: 90              # burn-in excluded from stockout statistics
+
+# -----------------------------------------------------------------------------
+# Forecasting
+# -----------------------------------------------------------------------------
+forecasting:
+  horizons: [7, 14, 30, 60, 90]
+  primary_horizon: 30          # aligns with review period + longest lead times
+  validation:
+    n_folds: 5                 # rolling-origin backtest (5 folds = 150 validation days;
+                               # 3 folds proved too few to choose reliably between 10 models)
+    fold_horizon_days: 30
+  # Demand is weekly-seasonal (no Saturday trading) so weekly seasonality = 7.
+  seasonal_period: 7
+  # SKUs whose demand is zero on more than this share of days are routed to
+  # intermittent-demand methods (Croston / SBA) rather than ETS/SARIMA.
+  intermittent_zero_share: 0.70
+  # SARIMA is ~50x more expensive than ETS. It is benchmarked on the highest-
+  # revenue dense SKUs only; fitting it 7,110 times is not justified unless it
+  # demonstrably wins on the SKUs that matter most.
+  sarima_sample_size: 100
+
+# -----------------------------------------------------------------------------
+# Inventory policy the SYSTEM recommends (vs. the incumbent policy above)
+# -----------------------------------------------------------------------------
+inventory_policy:
+  service_level: 0.95          # target cycle service level -> z = 1.645
+  # Safety stock uses the combined demand + lead-time variability formula:
+  #   SS = z * sqrt( LT * sigma_d^2 + d_bar^2 * sigma_LT^2 )
+  use_lead_time_variability: true
+  demand_sigma_window_days: 90 # trailing window for sigma_d and d_bar
+  review_period_days: 7        # protection interval = lead time + review period
+  # Window used to size the expected requirement for the OVERSTOCK test.
+  # This business turns inventory 2.2x/year (165 days of stock), so judging
+  # excess against a 30-day requirement would label 92% of SKUs overstocked -
+  # a meaningless alert list. 90 days of forward cover is a realistic operating
+  # target for seasonal giftware. Sensitivity at 60/90/120 days is reported in
+  # outputs/business_insights/overstock_threshold_sensitivity.csv
+  planning_horizon_days: 90
+
+# -----------------------------------------------------------------------------
+# Risk classification thresholds
+# -----------------------------------------------------------------------------
+# Expressed as ratios so they are scale-free across SKUs.
+#   cover_ratio  = current_inventory / reorder_point
+#   excess_ratio = current_inventory / expected_requirement
+risk_thresholds:
+  critical_stockout_cover_ratio: 0.50   # < 50% of reorder point
+  stockout_cover_ratio: 1.00            # below reorder point
+  overstock_excess_ratio: 1.50          # > 1.5x expected requirement
+  severe_overstock_excess_ratio: 3.00   # > 3x expected requirement
+  # A SKU must also clear a materiality floor to be flagged, so the action list
+  # is not swamped by pennies-worth of excess stock.
+  min_excess_value_gbp: 50.0
+  min_lost_revenue_gbp: 25.0
+  # A SKU whose 90-day forecast is below this is not 'overstocked' - it has
+  # stopped selling, and needs liquidation rather than a smaller reorder.
+  dead_stock_max_forecast_units: 1.0
+
+# -----------------------------------------------------------------------------
+# Prioritisation score (transparent, weighted, 0-100)
+# -----------------------------------------------------------------------------
+priority_score:
+  stockout_weights:
+    financial_exposure: 0.40   # estimated lost revenue over the horizon
+    severity: 0.25             # how far below reorder point
+    velocity: 0.15             # demand rate
+    lead_time_pressure: 0.10   # long lead time = slower to recover
+    revenue_contribution: 0.10 # SKU's share of total revenue
+  overstock_weights:
+    capital_tied_up: 0.45      # excess inventory value
+    severity: 0.25             # excess ratio
+    slowness: 0.20             # months of cover / demand decline
+    margin_risk: 0.10          # markdown exposure

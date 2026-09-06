@@ -1,0 +1,13 @@
+supplier_id,supplier_name,sourcing_region,supplier_lead_time_days,supplier_lead_time_sd_days,n_skus,inventory_value,daily_revenue_exposure,historical_fill_rate,historical_lost_revenue
+SUP-06,Maison Lyonnaise,EU Import,22,2.32,415,376158.13,7163.51,0.8925,355017.66
+SUP-09,Pearl River Sourcing,Far East Import,42,7.47,181,241547.12,1531.12,0.8703,130494.07
+SUP-01,Northgate Homeware,UK Domestic,5,1.66,244,201761.59,3972.32,0.9133,188368.63
+SUP-10,Golden Harbour Export,Far East Import,39,6.33,328,183795.49,3288.8,0.8894,179567.31
+SUP-04,Camden Wholesale,UK Domestic,10,2.46,277,182474.78,4226.24,0.9408,118470.6
+SUP-11,Shenzhen Craftworks,Far East Import,36,6.66,183,172351.37,3766.38,0.807,210979.74
+SUP-03,Severn Valley Supply,UK Domestic,5,1.14,89,129867.67,2935.76,0.9789,31295.44
+SUP-12,Bay Point Industries,Far East Import,32,5.19,180,129246.83,2900.41,0.9104,146381.2
+SUP-02,Pennine Giftware,UK Domestic,11,2.29,149,114839.42,1912.99,0.8716,112062.88
+SUP-08,Adriatic Trading,EU Import,18,4.32,169,93269.22,1568.77,0.9571,63015.25
+SUP-05,Rhineland Dekor,EU Import,22,3.97,106,73392.75,935.87,0.9275,35882.95
+SUP-07,Iberica Casa,EU Import,23,2.93,49,22235.04,941.99,0.8954,38248.19
